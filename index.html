@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script type="text/javascript" src="d3/d3.js"></script>
+    <meta charset="utf-8">
+  <style>
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: black;
+        shape-rendering: crispEdges;
+            }
+
+    .axis text {
+        font-family: sans-serif;
+        font-size: 11px;
+            }
+
+    circle {
+      color: black;
+    }
+
+  </style>
+  </head>
+
+  <body>
+   <script type="text/javascript">
+
+      var w = 350;
+      var h = 350;
+      var padding = 20;
+
+      var dataset = d3.csv("data/TODO_JUNTO_CON_RELIGION.CSV", function(d){
+        return{
+          trump: +d.Trump,
+          degree: +d["Total.bachelor.s.degree.or.higher_."]
+        };
+      },function(data) {
+        console.log(data[0]);
+        console.log("Hello", data);
+      });
+
+
+
+
+      //define scales
+
+      var xScale = d3.scale.linear()
+                 .domain([0, d3.max(dataset, function(d) { return d[degree]; })])
+                 .range([padding, w - padding * 2]);
+      var yScale = d3.scale.linear()
+                 .domain([0, d3.max(dataset, function(d) { return d[trump]; })])
+                 .range([h - padding, padding]);
+
+       var svg = d3.select("body")
+              .append("svg")
+              .attr("width", w)
+              .attr("height", h);
+
+       svg.selectAll("circle")
+            .data(dataset)
+            .enter().append("circle")
+            .attr("r",3.5)
+            .attr("cx", function(d){return xScale[d(degree)];})
+            .attr("cy", function(d){return yScale[d(trump)];});
+
+      //define axes
+
+      var xAxis = d3.svg.axis()
+                        .scale(xScale)
+                        .orient("bottom")
+                        .ticks(5);
+
+      var yAxis = d3.svg.axis()
+                        .scale(yScale)
+                        .orient("left")
+                        .ticks(5);
+
+
+      //draw axes
+      function drawAxes() {
+
+
+        svg.append("g")
+          .attr("class", "x axis")
+          .attr("transform", "translate(0," + (h - padding) + ")")
+          .call(xAxis)
+          .append("text")
+          .attr("x", w-padding)
+          .attr("y", 10)
+          .attr("dy", "1em")
+          .style("text-anchor", "end")
+          .attr("class", "label_sca")
+          .text("People who hold a bachelor's degree or higher");
+
+        svg.append("g")
+           .attr("class", "y axis")
+           .attr("transform", "translate(" + (padding) + ",0)")
+           .call(yAxis)
+           .append("text")
+           .attr("transform", "rotate(-90)")
+           .attr("x", padding)
+           .attr("dx", ".1em")
+           .attr("y", -10)
+           .attr("dy", "0.2em")
+           .style("text-anchor","end")
+           .attr("class", "label_sca")
+           .text("Trump");
+
+        yAxis.scale(yScale);
+        xAxis.scale(xScale);
+         };
+
+         drawAxes();
+
+    </script>
+
+  </body>
