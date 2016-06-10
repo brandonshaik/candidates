@@ -30,39 +30,61 @@
       var h = 350;
       var padding = 20;
 
-      var dataset = d3.csv("data/TODO_JUNTO_CON_RELIGION.CSV", function(d){
+      d3.csv("data/TODO_JUNTO_CON_RELIGION.csv", function(d){
         return{
           trump: +d.Trump,
           degree: +d["Total.bachelor.s.degree.or.higher_."]
         };
       },function(data) {
+
         console.log(data[0]);
         console.log("Hello", data);
-      });
-
 
 
 
       //define scales
 
       var xScale = d3.scale.linear()
-                 .domain([0, d3.max(dataset, function(d) { return d[degree]; })])
+                 .domain([0, d3.max(data, function(d) { console.log(d); return d['degree']; })])
                  .range([padding, w - padding * 2]);
       var yScale = d3.scale.linear()
-                 .domain([0, d3.max(dataset, function(d) { return d[trump]; })])
+                 .domain([0, d3.max(data, function(d) { return d['trump']; })])
                  .range([h - padding, padding]);
+
+
+      var xValue = function(d) { return d.degree};
+      var yValue = function(d) { return d.trump};
+
+      xScale.domain([d3.min(data, xValue)-2, d3.max(data, xValue)+2]);
+      yScale.domain([d3.min(data, yValue)-2, d3.max(data, yValue)+2]);
 
        var svg = d3.select("body")
               .append("svg")
               .attr("width", w)
               .attr("height", h);
 
-       svg.selectAll("circle")
-            .data(dataset)
+
+       var circles = svg.selectAll("circle")
+            .data(data)
             .enter().append("circle")
-            .attr("r",3.5)
-            .attr("cx", function(d){return xScale[d(degree)];})
-            .attr("cy", function(d){return yScale[d(trump)];});
+            .attr("id", function(d){
+              return d["county.name"];
+            })
+            .attr("r", 3.5)
+            .attr("cx", xValue)
+            .attr("cy", yValue);
+
+      circles.attr("cx", function(d){
+        if (!isNaN(d.degree)){
+          return xScale(d.degree);
+        }
+      })
+      .attr("cy", function(d){
+        if(!isNaN(d.trump)){
+          return yScale(d.trump);
+        }
+      });
+
 
       //define axes
 
@@ -77,7 +99,11 @@
                         .ticks(5);
 
 
+
+
       //draw axes
+
+
       function drawAxes() {
 
 
@@ -112,6 +138,10 @@
          };
 
          drawAxes();
+
+ });
+
+
 
     </script>
 
